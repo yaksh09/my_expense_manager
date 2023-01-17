@@ -25,7 +25,7 @@ class _DashBoardState extends State<DashBoard> {
   final Future<SharedPreferences> _pref = SharedPreferences.getInstance();
   static List<Widget> _widgetOptions = <Widget>[
     Home(),
-    Container(),
+    ChartView(),
     CurrencyConverter()
   ];
 
