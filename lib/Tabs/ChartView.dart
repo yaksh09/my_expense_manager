@@ -22,6 +22,8 @@ class _ChartViewState extends State<ChartView> {
   List<ChartData> debitList = [];
   List<ChartData> creditList = [];
 
+  Map<String, ChartData2> customMap = {};
+
   @override
   void initState() {
     getUser();
@@ -45,43 +47,79 @@ class _ChartViewState extends State<ChartView> {
   }
 
   getShortedList() {
+    transactionList.sort((a, b) {
+      var adate = a.date;
+      var bdate = b.date;
+      return bdate!.compareTo(adate!);
+    });
+
+    print("SORTEDLIST");
+
     for (int i = 0; i < transactionList.length; i++) {
-      if (transactionList[i].transaction_type == Debit) {
-        debitList.add(ChartData(
-            DateTime.parse(DateFormat('yyyy-MM-dd')
-                .format(DateTime.parse(transactionList[i].date!))),
-            transactionList[i].amount!));
+      print(transactionList[i].date);
+    }
+    print("SORTEDLIST-------------");
+
+    for (int i = 0; i < transactionList.length; i++) {
+      if ((customMap == null || customMap.isEmpty) ||
+          customMap.isNotEmpty &&
+              !customMap.containsKey(transactionList[i].date!)) {
+        var type = transactionList[i].transaction_type;
+        ChartData2 temp;
+        if (type == Debit) {
+          temp = ChartData2(DateTime.parse(transactionList[i].date!), 0,
+              transactionList[i].amount!);
+        } else {
+          temp = ChartData2(DateTime.parse(transactionList[i].date!),
+              transactionList[i].amount!, 0);
+        }
+
+        customMap[transactionList[i].date!] = temp;
       } else {
-        creditList.add(ChartData(
-            DateTime.parse(DateFormat('yyyy-MM-dd')
-                .format(DateTime.parse(transactionList[i].date!))),
-            transactionList[i].amount!));
+        print("INELSEE=====>>>>>");
+        var type = transactionList[i].transaction_type;
+        ChartData2 temp;
+
+        if (type == Debit) {
+          var tempValue = customMap[transactionList[i].date!]!.drValue;
+          print("EDITDEBIT===$tempValue");
+          temp = ChartData2(
+              DateTime.parse(transactionList[i].date!),
+              customMap[transactionList[i].date!]!.crValue,
+              tempValue + transactionList[i].amount!);
+        } else {
+          var tempValue = customMap[transactionList[i].date!]!.crValue;
+          print("EDITCREADIT===$tempValue");
+          temp = ChartData2(
+              DateTime.parse(transactionList[i].date!),
+              tempValue + transactionList[i].amount!,
+              customMap[transactionList[i].date!]!.drValue);
+        }
+
+        customMap[transactionList[i].date!] = temp;
       }
     }
 
+    print(customMap.toString());
 
+    customMap.values.forEach((element) {
+      print("${element.date} ===== ${element.crValue} ===  ${element.drValue}");
+    });
 
+    customMap.values.forEach((element) {
+      if (element.drValue != null && element.drValue != 0) {
+        debitList.add(ChartData(element.date, element.drValue));
+      }
+      if (element.crValue != null && element.crValue != 0) {
+        creditList.add(ChartData(element.date, element.crValue));
+      }
+    });
 
     setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<ChartData> chartData = [
-      ChartData(DateTime(2022, 12, 18), 1),
-      ChartData(DateTime(2016, 1, 2), 11),
-      ChartData(DateTime(2017, 3, 1), 9),
-      ChartData(DateTime(2018, 4, 1), 14),
-      ChartData(DateTime(2019, 5, 1), 10),
-    ];
-
-    final List<ChartData> chartData1 = [
-      ChartData(DateTime(2015, 1, 1), 1),
-      ChartData(DateTime(2016, 1, 2), 11),
-      ChartData(DateTime(2017, 3, 1), 9),
-      ChartData(DateTime(2018, 4, 1), 14),
-      ChartData(DateTime(2019, 5, 1), 10),
-    ];
     return Scaffold(
         body: SfCartesianChart(
             tooltipBehavior: _tooltipBehavior,
@@ -117,4 +155,12 @@ class ChartData {
 
   final DateTime x;
   final double y;
+}
+
+class ChartData2 {
+  ChartData2(this.date, this.crValue, this.drValue);
+
+  final DateTime date;
+  final double crValue;
+  final double drValue;
 }
