@@ -52,7 +52,7 @@ class DbHelper {
 
     await db.execute('''
           CREATE TABLE $tableTransactions (
-            $columnId INTEGER PRIMARY KEY,
+            $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
             $C_UserID INTEGER,
             $columnTitle TEXT NOT NULL,
             $transactionType TEXT NOT NULL,
@@ -90,6 +90,9 @@ class DbHelper {
 
   Future<int> insertTransaction(TransactionModel element) async {
     Database? database = await db;
+    print(element.id);
+    print(element.title);
+    print(element.date);
     int id = await database!.insert(tableTransactions, element.toMap());
     return id;
   }
@@ -98,6 +101,7 @@ class DbHelper {
     Database? database = await db;
     List<Map<String, dynamic>> res = await database!.query(tableTransactions,
         columns: [
+          columnId,
           C_UserID,
           columnTitle,
           columnAmount,
@@ -110,5 +114,15 @@ class DbHelper {
         res.map((e) => TransactionModel.fromMap(e)).toList();
 
     return abc;
+  }
+
+  Future<int> deleteTransactions(int userId, int transactionId) async {
+    Database? database = await db;
+
+    int id = await database!.delete(tableTransactions,
+        where: '$C_UserID = ? and $columnId = ?',
+        whereArgs: [userId, transactionId]);
+
+    return id;
   }
 }

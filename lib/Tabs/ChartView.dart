@@ -134,18 +134,18 @@ class _ChartViewState extends State<ChartView> {
               dataSource: creditList,
               xValueMapper: (ChartData data, _) => data.x,
               yValueMapper: (ChartData data, _) => data.y,
-              width: 0.6,
+              width: 0.1,
               name: Credit,
               color: Colors.green,
-              spacing: 0.3),
+              spacing: 0),
           BarSeries<ChartData, DateTime>(
               dataSource: debitList,
               xValueMapper: (ChartData data, _) => data.x,
               yValueMapper: (ChartData data, _) => data.y,
-              width: 0.6,
+              width: 0.1,
               name: Debit,
               color: Colors.red,
-              spacing: 0.3)
+              spacing: 0)
         ]));
   }
 }

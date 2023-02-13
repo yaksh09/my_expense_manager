@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:my_expense_manager/Common/common.dart';
@@ -111,54 +113,75 @@ class _HomeState extends State<Home> {
                         shrinkWrap: true,
                         padding: const EdgeInsets.only(bottom: 75),
                         itemBuilder: (context, index) {
-                          return Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 10),
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: kPrimaryColor,
-                                  ),
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(20))),
-                              child: Row(
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        transactionList[index]
-                                            .title!
-                                            .capitalize(),
-                                        maxLines: 1,
-                                        style: const TextStyle(
-                                            fontSize: 18, color: kPrimaryColor),
-                                      ),
-                                      const SizedBox(
-                                        height: 6,
-                                      ),
-                                      Text(
-                                        DateFormat('d MMM yyyy').format(
-                                            DateTime.parse(
-                                                transactionList[index].date!)),
-                                        style: const TextStyle(
-                                            fontSize: 12, color: Colors.grey),
-                                      ),
-                                    ],
-                                  ),
-                                  const Spacer(),
-                                  Text(
-                                    transactionList[index].transaction_type! ==
-                                            Credit
-                                        ? "+ £${transactionList[index].amount!}"
-                                        : "- £${transactionList[index].amount!}",
-                                    style: const TextStyle(
-                                        color: kPrimaryColor,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                ],
-                              ));
+                          final item = transactionList[index].id;
+                          return Dismissible(
+                            background: Container(
+                              color: Colors.red,
+                              alignment: Alignment.centerRight,
+                              child: const Padding(
+                                padding: EdgeInsets.all(15),
+                                child: Icon(Icons.delete, color: Colors.white),
+                              ),
+                            ),
+                            key: Key(item.toString()),
+                            onDismissed: (direction) {
+                              print(transactionList[index].id);
+                              DbHelper.instance.deleteTransactions(
+                                  userId, transactionList[index].id!);
+                              transactionList.remove(transactionList[index]);
+                            },
+                            child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 10),
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: kPrimaryColor,
+                                    ),
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(20))),
+                                child: Row(
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          transactionList[index]
+                                              .title!
+                                              .capitalize(),
+                                          maxLines: 1,
+                                          style: const TextStyle(
+                                              fontSize: 18,
+                                              color: kPrimaryColor),
+                                        ),
+                                        const SizedBox(
+                                          height: 6,
+                                        ),
+                                        Text(
+                                          DateFormat('d MMM yyyy').format(
+                                              DateTime.parse(
+                                                  transactionList[index]
+                                                      .date!)),
+                                          style: const TextStyle(
+                                              fontSize: 12, color: Colors.grey),
+                                        ),
+                                      ],
+                                    ),
+                                    const Spacer(),
+                                    Text(
+                                      transactionList[index]
+                                                  .transaction_type! ==
+                                              Credit
+                                          ? "+ £${transactionList[index].amount!}"
+                                          : "- £${transactionList[index].amount!}",
+                                      style: const TextStyle(
+                                          color: kPrimaryColor,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
+                                )),
+                          );
                         },
                         separatorBuilder: (context, index) {
                           return const SizedBox(
@@ -367,6 +390,16 @@ class _HomeState extends State<Home> {
         DbHelper.instance.getAllTransactions(userId);
     transactionList = await res;
     transactionList = transactionList.reversed.toList();
+    for (var a in transactionList) {
+      print(a.id);
+      print(a.title);
+    }
     setState(() {});
+  }
+
+  int getRandom() {
+    var intValue = Random().nextInt(10);
+    intValue = Random().nextInt(100) + 50;
+    return intValue;
   }
 }

@@ -43,7 +43,6 @@ class _LoginFormState extends State<LoginForm> {
     } else {
       await dbHelper.getLoginUser(uname, passwd).then((userData) async {
         if (userData != null) {
-
           setSP(userData).whenComplete(() {
             Navigator.pushAndRemoveUntil(
                 context,
@@ -51,7 +50,6 @@ class _LoginFormState extends State<LoginForm> {
                 (Route<dynamic> route) => false);
             print("SUCCESS");
           });
-
         } else {
           alertDialog(context, "Error: User Not Found");
         }
@@ -71,7 +69,7 @@ class _LoginFormState extends State<LoginForm> {
     print("USERRR====${user.user_id}");
 
     await preferences.setPreference("user_id", user.user_id);
-    await preferences.setPreference("user_name", user.password);
+    await preferences.setPreference("user_name", user.user_name);
   }
 
   @override
