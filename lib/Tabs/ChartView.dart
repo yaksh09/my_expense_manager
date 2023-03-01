@@ -47,11 +47,11 @@ class _ChartViewState extends State<ChartView> {
   }
 
   getShortedList() {
-    transactionList.sort((a, b) {
-      var adate = a.date;
-      var bdate = b.date;
-      return bdate!.compareTo(adate!);
-    });
+      transactionList.sort((a, b) {
+        var adate = a.date;
+        var bdate = b.date;
+        return bdate!.compareTo(adate!);
+      });
 
     print("SORTEDLIST");
 
@@ -75,7 +75,8 @@ class _ChartViewState extends State<ChartView> {
         }
 
         customMap[transactionList[i].date!] = temp;
-      } else {
+      }
+      else {
         print("INELSEE=====>>>>>");
         var type = transactionList[i].transaction_type;
         ChartData2 temp;

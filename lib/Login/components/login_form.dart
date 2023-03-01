@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_expense_manager/Login/login_screen.dart';
+import 'package:my_expense_manager/dashboard/videoPlayerView.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../constants.dart';
@@ -20,7 +20,7 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   Future<SharedPreferences> _pref = SharedPreferences.getInstance();
-  final _formKey = new GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
 
   final _conUserName = TextEditingController();
   final _conPassword = TextEditingController();
@@ -115,6 +115,25 @@ class _LoginFormState extends State<LoginForm> {
               },
               child: Text(
                 "Login".toUpperCase(),
+              ),
+            ),
+          ),
+          const SizedBox(height: defaultPadding),
+          Hero(
+            tag: "demo",
+            child: ElevatedButton(
+              onPressed: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) {
+                      return  VideoPlayerView();
+                    },
+                  ),
+                );
+              },
+              child: Text(
+                "Demo".toUpperCase(),
               ),
             ),
           ),
