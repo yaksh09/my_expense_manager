@@ -37,7 +37,13 @@ class _SignUpFormState extends State<SignUpForm> {
 
     if (_formKey != null && _formKey.currentState != null) {
       if (_formKey.currentState!.validate()) {
-        if (passwd != cpasswd) {
+        if (uname.isEmpty) {
+          alertDialog(context, 'Please enter user name');
+        } else if (passwd.isEmpty) {
+          alertDialog(context, 'Please enter password');
+        } else if (passwd.length < 6) {
+          alertDialog(context, 'Your password must be 6 character long');
+        } else if (passwd != cpasswd) {
           alertDialog(context, 'Password Mismatch');
         } else {
           _formKey.currentState!.save();
@@ -45,7 +51,6 @@ class _SignUpFormState extends State<SignUpForm> {
           UserModel uModel = UserModel(uname, passwd);
           await dbHelper.saveData(uModel).then((userData) {
             alertDialog(context, "Successfully Saved");
-
 
             CallNextScreenAndClearStack(context, LoginScreen());
           }).catchError((error) {
