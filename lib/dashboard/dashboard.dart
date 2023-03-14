@@ -1,15 +1,24 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_share/flutter_share.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:my_expense_manager/Login/login_screen.dart';
+import 'package:path_provider/path_provider.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Common/common.dart';
 import '../Common/preferences.dart';
+import '../DatabaseHandler/DbHelper.dart';
+import '../Model/transactionsModel.dart';
 import '../Tabs/CurrencyConverter.dart';
 import '../Tabs/Home.dart';
 import '../Tabs/ChartView.dart';
 import '../constants.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:pdf/pdf.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({Key? key}) : super(key: key);
@@ -28,6 +37,7 @@ class _DashBoardState extends State<DashBoard> {
     ChartView(),
     CurrencyConverter()
   ];
+  List<TransactionModel> transactionList = [];
 
   @override
   void initState() {
@@ -38,6 +48,14 @@ class _DashBoardState extends State<DashBoard> {
   getUser() async {
     userName = await preferences.getPreference('user_name', '');
     userId = await preferences.getPreference('user_id', 0);
+    await _updateUserTransactionsList();
+  }
+
+  _updateUserTransactionsList() async {
+    Future<List<TransactionModel>> res =
+        DbHelper.instance.getAllTransactions(userId);
+    transactionList = await res;
+    transactionList = transactionList.reversed.toList();
   }
 
   @override
@@ -47,6 +65,15 @@ class _DashBoardState extends State<DashBoard> {
       appBar: AppBar(
         elevation: 0,
         actions: [
+          InkWell(
+            onTap: () {
+              shareViaWhatsApp();
+            },
+            child: Container(
+              padding: const EdgeInsets.only(right: 16),
+              child: const Icon(Icons.whatsapp),
+            ),
+          ),
           InkWell(
             onTap: () {
               showUserBottomSheet();
@@ -111,6 +138,115 @@ class _DashBoardState extends State<DashBoard> {
         ),
       ),
     );
+  }
+
+  shareViaWhatsApp() async {
+    final pdf = pw.Document();
+    Directory appDocDirectory = await getApplicationDocumentsDirectory();
+
+    pdf.addPage(pw.Page(build: (pw.Context context) {
+      return pw.Column(children: [
+        pw.Text(
+          "My EXPENSE MANAGER",
+          textAlign: pw.TextAlign.center,
+          style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 18),
+        ),
+        pw.SizedBox(height: 20),
+        pw.Container(
+            alignment: pw.Alignment.centerRight,
+            margin: const pw.EdgeInsets.only(bottom: 3.0 * PdfPageFormat.mm),
+            padding: const pw.EdgeInsets.only(bottom: 3.0 * PdfPageFormat.mm),
+            child: pw.Table(
+              border: pw.TableBorder.all(width: 1, color: PdfColors.grey),
+              children: renderDetailRow(),
+            ))
+      ]);
+    }));
+
+    Directory(appDocDirectory.path + '/' + 'dir')
+        .create(recursive: true)
+        .then((Directory directory) {
+      print('Path of New Dir: ' + directory.path);
+
+      final file = File('${directory.path}/${DateTime.now()}.pdf');
+      file.create(recursive: true).then((value) async {
+        await file.writeAsBytes(await pdf.save()).then((value) {
+          FlutterShare.shareFile(
+            title: "My EXPENSE MANAGER",
+            filePath: value.path,
+          );
+        });
+      });
+    });
+  }
+
+  List<pw.TableRow> renderDetailRow() {
+    List<pw.TableRow> rows = [];
+
+    rows.add(pw.TableRow(
+        verticalAlignment: pw.TableCellVerticalAlignment.middle,
+        children: [
+          // pw.Text("  "),
+          pw.Text(
+            "Date",
+            textAlign: pw.TextAlign.center,
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14),
+          ),
+          pw.Text(
+            "Type",
+            textAlign: pw.TextAlign.center,
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14),
+          ),
+          pw.Text(
+            "Amount",
+            textAlign: pw.TextAlign.center,
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14),
+          ),
+          pw.Text(
+            "Description",
+            textAlign: pw.TextAlign.center,
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 14),
+          ),
+        ]));
+    for (int i = 0; i < transactionList.length; i++) {
+      // if (temp[i].companyValues != null && temp[i].companyValues!.isNotEmpty) {
+      rows.add(pw.TableRow(children: [
+        pw.Padding(
+          padding: pw.EdgeInsets.all(5),
+          child: pw.Text(
+            transactionList[i].date!,
+            textAlign: pw.TextAlign.center,
+            style: pw.TextStyle(fontSize: 14),
+          ),
+        ),
+        pw.Padding(
+          padding: pw.EdgeInsets.all(5),
+          child: pw.Text(
+            transactionList[i].transaction_type!,
+            textAlign: pw.TextAlign.center,
+            style: pw.TextStyle(fontSize: 14),
+          ),
+        ),
+        pw.Padding(
+          padding: pw.EdgeInsets.all(5),
+          child: pw.Text(
+            transactionList[i].amount!.toString(),
+            textAlign: pw.TextAlign.center,
+            style: pw.TextStyle(fontSize: 14),
+          ),
+        ),
+        pw.Padding(
+          padding: pw.EdgeInsets.all(5),
+          child: pw.Text(
+            transactionList[i].title!,
+            textAlign: pw.TextAlign.center,
+            style: pw.TextStyle(fontSize: 14),
+          ),
+        ),
+      ]));
+      // }
+    }
+    return rows;
   }
 
   showUserBottomSheet() {

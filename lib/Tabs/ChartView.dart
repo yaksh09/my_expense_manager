@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_share/flutter_share.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
@@ -6,6 +9,9 @@ import '../Common/preferences.dart';
 import '../DatabaseHandler/DbHelper.dart';
 import '../Model/transactionsModel.dart';
 import '../constants.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
 
 class ChartView extends StatefulWidget {
   const ChartView({Key? key}) : super(key: key);
@@ -47,11 +53,11 @@ class _ChartViewState extends State<ChartView> {
   }
 
   getShortedList() {
-      transactionList.sort((a, b) {
-        var adate = a.date;
-        var bdate = b.date;
-        return bdate!.compareTo(adate!);
-      });
+    transactionList.sort((a, b) {
+      var adate = a.date;
+      var bdate = b.date;
+      return bdate!.compareTo(adate!);
+    });
 
     print("SORTEDLIST");
 
@@ -75,8 +81,7 @@ class _ChartViewState extends State<ChartView> {
         }
 
         customMap[transactionList[i].date!] = temp;
-      }
-      else {
+      } else {
         print("INELSEE=====>>>>>");
         var type = transactionList[i].transaction_type;
         ChartData2 temp;
@@ -131,24 +136,26 @@ class _ChartViewState extends State<ChartView> {
               edgeLabelPlacement: EdgeLabelPlacement.shift,
             ),
             series: <ChartSeries<ChartData, DateTime>>[
-          BarSeries<ChartData, DateTime>(
-              dataSource: creditList,
-              xValueMapper: (ChartData data, _) => data.x,
-              yValueMapper: (ChartData data, _) => data.y,
-              width: 0.1,
-              name: Credit,
-              color: Colors.green,
-              spacing: 0),
-          BarSeries<ChartData, DateTime>(
-              dataSource: debitList,
-              xValueMapper: (ChartData data, _) => data.x,
-              yValueMapper: (ChartData data, _) => data.y,
-              width: 0.1,
-              name: Debit,
-              color: Colors.red,
-              spacing: 0)
-        ]));
+              BarSeries<ChartData, DateTime>(
+                  dataSource: creditList,
+                  xValueMapper: (ChartData data, _) => data.x,
+                  yValueMapper: (ChartData data, _) => data.y,
+                  width: 0.1,
+                  name: Credit,
+                  color: Colors.green,
+                  spacing: 0),
+              BarSeries<ChartData, DateTime>(
+                  dataSource: debitList,
+                  xValueMapper: (ChartData data, _) => data.x,
+                  yValueMapper: (ChartData data, _) => data.y,
+                  width: 0.1,
+                  name: Debit,
+                  color: Colors.red,
+                  spacing: 0)
+            ]));
   }
+
+
 }
 
 class ChartData {

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -11,9 +12,9 @@ import '../Common/preferences.dart';
 import '../DatabaseHandler/DbHelper.dart';
 import '../Model/transactionsModel.dart';
 
-class Home extends StatefulWidget {
-  const Home({Key? key}) : super(key: key);
 
+
+class Home extends StatefulWidget {
   @override
   State<Home> createState() => _HomeState();
 }
@@ -402,4 +403,5 @@ class _HomeState extends State<Home> {
     intValue = Random().nextInt(100) + 50;
     return intValue;
   }
+
 }
